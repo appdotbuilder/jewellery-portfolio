@@ -1,8 +1,29 @@
+import { db } from '../db';
+import { jewelleryItemsTable } from '../db/schema';
 import { type JewelleryItem } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export const getJewelleryItem = async (id: number): Promise<JewelleryItem | null> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a single jewellery item by ID from the database.
-    // Should query jewellery_items table by ID and return the item or null if not found.
-    return null;
+  try {
+    // Query the database for the jewellery item by ID
+    const results = await db.select()
+      .from(jewelleryItemsTable)
+      .where(eq(jewelleryItemsTable.id, id))
+      .execute();
+
+    // Return null if no item found
+    if (results.length === 0) {
+      return null;
+    }
+
+    // Convert numeric fields back to numbers before returning
+    const item = results[0];
+    return {
+      ...item,
+      price: parseFloat(item.price) // Convert string back to number
+    };
+  } catch (error) {
+    console.error('Get jewellery item failed:', error);
+    throw error;
+  }
 };
